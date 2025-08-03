@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iterative Convergence Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            padding: 30px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        input {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            padding: 30px;
+            background: #f9fafb;
+        }
+
+        .convergence-status {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .condition-check {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            background: #f9fafb;
+        }
+
+        .condition-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .condition-result {
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .condition-result.met {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .condition-result.not-met {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .iterations-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .iteration-row:hover {
+            background: #f9fafb;
+        }
+
+        .converged-row {
+            background: #ecfdf5;
+            font-weight: 600;
+        }
+
+        .error-row {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .convergence-conditions {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .convergence-conditions h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .conditions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .condition-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .condition-box.met {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .condition-box.not-met {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .condition-title {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .condition-desc {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .condition-status {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .condition-status.met {
+            color: #059669;
+        }
+
+        .condition-status.not-met {
+            color: #dc2626;
+        }
+
+        .theorem-conclusion {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #6b7280;
+            font-weight: 600;
+        }
+
+        .theorem-conclusion.guaranteed {
+            background: #ecfdf5;
+            border-left-color: #10b981;
+            color: #059669;
+        }
+
+        .theorem-conclusion.not-guaranteed {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #dc2626;
+        }
+
+        .formula {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Iterative Convergence Calculator</h1>
+            <p>Calculate convergence for x<sub>n+1</sub> = √(3x<sub>n</sub> - 2)</p>
+        </div>
+
+        <div class="controls">
+            <div class="formula">
+                x<sub>n+1</sub> = √(3x<sub>n</sub> - 2)
+            </div>
+            
+            <div class="input-group">
+                <div class="form-group">
+                    <label for="x0">Starting Value (x₀):</label>
+                    <input type="number" id="x0" step="any" placeholder="Enter starting value" value="1.9">
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxIterations">Max Iterations:</label>
+                    <input type="number" id="maxIterations" min="1" max="100" value="10">
+                </div>
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateConvergence()">Calculate Convergence</button>
+        </div>
+
+        <div class="results" id="results" style="display: none;">
+            <div class="convergence-conditions" id="convergence-conditions" style="display: none;">
+                <h3>Fixed-Point Theorem Conditions</h3>
+                <div class="conditions-grid">
+                    <div class="condition-box" id="condition1">
+                        <div class="condition-title">Condition 1: g([a,b]) ⊆ [a,b]</div>
+                        <div class="condition-desc">The function g(x) maps the interval [a,b] into itself.</div>
+                        <div class="condition-status" id="condition1-status"></div>
+                    </div>
+                    <div class="condition-box" id="condition2">
+                        <div class="condition-title">Condition 2: |g'(x)| ≤ K < 1</div>
+                        <div class="condition-desc">The absolute value of the derivative is less than 1 in [a,b].</div>
+                        <div class="condition-status" id="condition2-status"></div>
+                    </div>
+                </div>
+                <div class="theorem-conclusion" id="theorem-conclusion"></div>
+            </div>
+
+            <div id="convergence-status" class="convergence-status">
+                <div class="condition-check">
+                    <span class="condition-label">Condition 1 (g[a,b] ⊆ [a,b]):</span>
+                    <span id="condition1-result" class="condition-result"></span>
+                </div>
+                <div class="condition-check">
+                    <span class="condition-label">Condition 2 (|g'(x)| ≤ K < 1):</span>
+                    <span id="condition2-result" class="condition-result"></span>
+                </div>
+            </div>
+            
+            <div class="iterations-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Iteration (n)</th>
+                            <th>x<sub>n</sub></th>
+                            <th>Difference (Δ)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="iterationsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateConvergence() {
+            const x0 = parseFloat(document.getElementById('x0').value);
+            const maxIterations = parseInt(document.getElementById('maxIterations').value);
+            const tolerance = 1e-6; // Fixed tolerance of 0.000001
+            
+            // Validate inputs
+            if (isNaN(x0) || isNaN(maxIterations)) {
+                showError("Please enter valid numerical values.");
+                return;
+            }
+            
+            if (maxIterations <= 0) {
+                showError("Max iterations must be a positive value.");
+                return;
+            }
+
+            if (x0 < 2/3) {
+                showError("Starting value x₀ must be ≥ 2/3 for the function to be defined.");
+                return;
+            }
+            
+            // Clear previous results
+            const resultsDiv = document.getElementById('results');
+            const iterationsBody = document.getElementById('iterationsBody');
+            
+            iterationsBody.innerHTML = '';
+            resultsDiv.style.display = 'block';
+            
+            // Add initial value row
+            const initialRow = document.createElement('tr');
+            initialRow.className = 'iteration-row';
+            initialRow.innerHTML = `
+                <td>0</td>
+                <td>${x0.toFixed(10)}</td>
+                <td>-</td>
+                <td>Initial value</td>
+            `;
+            iterationsBody.appendChild(initialRow);
+            
+            let xn = x0;
+            let converged = false;
+            
+            for (let n = 1; n <= maxIterations; n++) {
+                const xn1 = Math.sqrt(3 * xn - 2);
+                
+                if (isNaN(xn1)) {
+                    const errorRow = document.createElement('tr');
+                    errorRow.className = 'iteration-row error-row';
+                    errorRow.innerHTML = `
+                        <td>${n}</td>
+                        <td>NaN</td>
+                        <td>-</td>
+                        <td>Function undefined</td>
+                    `;
+                    iterationsBody.appendChild(errorRow);
+                    break;
+                }
+                
+                const diff = Math.abs(xn1 - xn);
+                const isConvergedNow = diff < tolerance;
+                
+                const row = document.createElement('tr');
+                row.className = isConvergedNow ? 'iteration-row converged-row' : 'iteration-row';
+                row.innerHTML = `
+                    <td>${n}</td>
+                    <td>${xn1.toFixed(10)}</td>
+                    <td>${diff.toExponential(3)}</td>
+                    <td>${isConvergedNow ? '✅ Converged' : '⏳ Calculating...'}</td>
+                `;
+                iterationsBody.appendChild(row);
+                
+                if (isConvergedNow) {
+                    converged = true;
+                    break;
+                }
+                
+                xn = xn1;
+            }
+            
+            // Check convergence conditions
+            checkConvergenceConditions();
+        }
+        
+        function checkConvergenceConditions() {
+            const conditionsDiv = document.getElementById('convergence-conditions');
+            const condition1Box = document.getElementById('condition1');
+            const condition2Box = document.getElementById('condition2');
+            const condition1Status = document.getElementById('condition1-status');
+            const condition2Status = document.getElementById('condition2-status');
+            const theoremConclusion = document.getElementById('theorem-conclusion');
+            const condition1Result = document.getElementById('condition1-result');
+            const condition2Result = document.getElementById('condition2-result');
+            
+            conditionsDiv.style.display = 'block';
+            
+            // Define interval [a,b] around the fixed point
+            const a = 1.5, b = 2.1;
+            
+            // g(x) = sqrt(3x - 2)
+            function g(x) {
+                return Math.sqrt(3 * x - 2);
+            }
+            
+            // g'(x) = 3/(2*sqrt(3x - 2))
+            function gPrime(x) {
+                return 3 / (2 * Math.sqrt(3 * x - 2));
+            }
+            
+            // Condition 1: Check if g([a,b]) ⊆ [a,b]
+            const gA = g(a); // g(1.5) = sqrt(2.5) ≈ 1.581
+            const gB = g(b); // g(2.1) = sqrt(4.3) ≈ 2.073
+            const condition1Met = gA >= a && gB <= b && gA <= gB;
+            
+            if (condition1Met) {
+                condition1Box.className = 'condition-box met';
+                condition1Status.className = 'condition-status met';
+                condition1Status.textContent = `✅ MET: g([${a},${b}]) = [${gA.toFixed(3)}, ${gB.toFixed(3)}] ⊆ [${a},${b}]`;
+                condition1Result.textContent = 'CONDITION MET';
+                condition1Result.className = 'condition-result met';
+            } else {
+                condition1Box.className = 'condition-box not-met';
+                condition1Status.className = 'condition-status not-met';
+                condition1Status.textContent = `❌ NOT MET: g([${a},${b}]) = [${gA.toFixed(3)}, ${gB.toFixed(3)}] ⊄ [${a},${b}]`;
+                condition1Result.textContent = 'CONDITION NOT MET';
+                condition1Result.className = 'condition-result not-met';
+            }
+            
+            // Condition 2: Check if |g'(x)| ≤ K < 1 for all x ∈ [a,b]
+            let maxDerivative = 0;
+            let condition2Met = true;
+            
+            for (let x = a; x <= b; x += 0.01) {
+                if (3 * x - 2 > 0) {
+                    const derivative = Math.abs(gPrime(x));
+                    maxDerivative = Math.max(maxDerivative, derivative);
+                    if (derivative >= 1) {
+                        condition2Met = false;
+                    }
+                }
+            }
+            
+            if (condition2Met) {
+                condition2Box.className = 'condition-box met';
+                condition2Status.className = 'condition-status met';
+                condition2Status.textContent = `✅ MET: max|g'(x)| = ${maxDerivative.toFixed(3)} < 1`;
+                condition2Result.textContent = 'CONDITION MET';
+                condition2Result.className = 'condition-result met';
+            } else {
+                condition2Box.className = 'condition-box not-met';
+                condition2Status.className = 'condition-status not-met';
+                condition2Status.textContent = `❌ NOT MET: max|g'(x)| = ${maxDerivative.toFixed(3)} ≥ 1`;
+                condition2Result.textContent = 'CONDITION NOT MET';
+                condition2Result.className = 'condition-result not-met';
+            }
+            
+            // Theorem conclusion
+            if (condition1Met && condition2Met) {
+                theoremConclusion.className = 'theorem-conclusion guaranteed';
+                theoremConclusion.textContent = '🎯 CONVERGENCE GUARANTEED: Both conditions satisfied → Unique fixed point exists and iteration will converge';
+            } else {
+                theoremConclusion.className = 'theorem-conclusion not-guaranteed';
+                theoremConclusion.textContent = '⚠️ CONVERGENCE NOT GUARANTEED: Conditions not met → Convergence is not theoretically assured';
+            }
+        }
+        
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            const iterationsBody = document.getElementById('iterationsBody');
+            
+            resultsDiv.style.display = 'block';
+            iterationsBody.innerHTML = `<tr class="iteration-row error-row"><td>-</td><td>-</td><td>-</td><td>${message}</td></tr>`;
+        }
+        
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateConvergence();
+            }
+        });
+        
+        // Calculate with default values on page load
+        window.addEventListener('load', function() {
+            calculateConvergence();
+        });
+    </script>
+</body>
+</html>
